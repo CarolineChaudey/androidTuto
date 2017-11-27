@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Todo list</string>
-    <string name="add_task_title">Add task</string>
     <string name="title_activity_add_task">Add task</string>
+
+    <string name="task_title_hint">Title</string>
+    <string name="task_description_hint">Description</string>
+    <string name="task_creation_button">Add task</string>
 </resources>
