@@ -18,6 +18,7 @@ class AddTaskActivity : AppCompatActivity() {
             val title = task_title_field.text.toString()
             val description = task_description_field.text.toString()
             val task = Task(title, description)
+            Database.getInstance().add(task)
             finish()
         }
     }
