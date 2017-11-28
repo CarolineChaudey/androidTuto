@@ -18,8 +18,7 @@ class ListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_list)
         setSupportActionBar(toolbar)
 
-        taskList = Database(this)
-        taskList.add(Task("toto","blablabla"))
+        Database.getInstance(this)?.writableDatabase
 
         fab.setOnClickListener { view ->
             val toAddTask = Intent(this, AddTaskActivity::class.java)

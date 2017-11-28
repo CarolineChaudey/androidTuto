@@ -28,6 +28,17 @@ class Database(val context: Context) : SQLiteOpenHelper(context, DATABASENAME,
     companion object {
         private val DATABASENAME = "task"
         private val DATABASEVERSION = 1
+
+        private var INSTANCE: Database? = null
+
+        @Synchronized
+        fun getInstance(context: Context): Database? {
+            if (INSTANCE == null){
+                INSTANCE = Database(context)
+            }
+            return INSTANCE
+        }
+
     }
 
     fun add(task: Task) {
