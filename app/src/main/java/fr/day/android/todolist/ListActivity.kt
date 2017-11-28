@@ -11,17 +11,22 @@ import kotlinx.android.synthetic.main.activity_list.*
 
 class ListActivity : AppCompatActivity() {
 
-    var taskList = Database.getInstance().getAll()
+    private lateinit var taskList : Database
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
         setSupportActionBar(toolbar)
 
+        taskList = Database(this)
+        taskList.add(Task("toto","blablabla"))
+
         fab.setOnClickListener { view ->
             val toAddTask = Intent(this, AddTaskActivity::class.java)
             startActivity(toAddTask)
         }
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
