@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.activity_list.*
 
 class ListActivity : AppCompatActivity() {
 
+    var taskList = Database.getInstance().getAll()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
