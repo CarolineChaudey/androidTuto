@@ -17,8 +17,8 @@ class AddTaskActivity : AppCompatActivity() {
         add_button.setOnClickListener { view ->
             val title = task_title_field.text.toString()
             val description = task_description_field.text.toString()
-            val task = Task(title, description)
-            //Database.getInstance().add(task)
+           // val task = Task(title, description)
+            //SQLiteManager.getInstance().add(task)
             finish()
         }
     }

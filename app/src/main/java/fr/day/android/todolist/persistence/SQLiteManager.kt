@@ -1,52 +1,124 @@
 package fr.day.android.todolist
 
-import android.app.Application
+import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import android.widget.Toast
 
 /**
  * Created by caroline on 27/11/17.
  */
-class Database(val context: Context) : SQLiteOpenHelper(context, DATABASENAME,
+class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DATABASENAME,
         null, DATABASEVERSION) {
+
     override fun onCreate(db: SQLiteDatabase?) {
         db?.let {
-            val query = "CREATE TABLE task(taskId INTEGER, title TEXT, description TEXT)"
+            val query = "CREATE TABLE $TABLENAME(id INTEGER PRIMARY KEY, title TEXT, description TEXT);"
             it.execSQL(query)
-            Log.v("@@@TESSSTTT","task database created successfully")
+            Log.v("@@@TESSSTTT", "task database created successfully")
         }
     }
+
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        if (oldVersion != newVersion) {
+            val dropTableQuery = "DROP TABLE IF EXISTS $TABLENAME;"
+            db?.let {
+                it.execSQL(dropTableQuery)
+                onCreate(it)
+            }
+        }
+
     }
 
-    private var tasks = mutableListOf<Task>()
+    var tasks = mutableListOf<Task>()
 
     companion object {
-        private val DATABASENAME = "task"
-        private val DATABASEVERSION = 1
 
-        private var INSTANCE: Database? = null
+        private val DATABASENAME = "task.db"
+        private val TABLENAME = "task"
+        private var DATABASEVERSION = 1
+
+        private var INSTANCE: SQLiteManager? = null
 
         @Synchronized
-        fun getInstance(context: Context): Database? {
-            if (INSTANCE == null){
-                INSTANCE = Database(context)
+        fun getInstance(context: Context): SQLiteManager? {
+            if (INSTANCE == null) {
+                INSTANCE = SQLiteManager(context)
             }
             return INSTANCE
         }
-
     }
 
     fun add(task: Task) {
-        this.writableDatabase
-        tasks.add(task)
+
+        val db = this.writableDatabase
+        db.beginTransaction()
+
+        val values = ContentValues()
+        values.put("title", task.title)
+        values.put("description", task.description)
+
+        try {
+            db.insert(TABLENAME, null, values)
+            db.setTransactionSuccessful()
+        } catch (e: Exception) {
+            Log.v("@@@ERROR", e.toString())
+        } finally {
+            db.endTransaction()
+        }
+
     }
 
-    fun getAll(): List<Task> {
-        return tasks
+    private fun loadTasks(){
+        val db = readableDatabase
+
+        tasks.clear()
+
+        try {
+
+            db.beginTransaction()
+            val cursor = db.rawQuery("SELECT * FROM $TABLENAME", null)
+
+            if (cursor.moveToFirst()) {
+                do {
+                    tasks.add(Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2)))
+                } while (cursor.moveToNext())
+            }
+        } catch (e: Exception) {
+            Log.v("@@@ERROR", e.toString())
+        } finally {
+            db.endTransaction()
+        }
+
     }
+
+    fun updateTask(task: Task){
+
+        val db = writableDatabase
+
+        val contentValues = ContentValues()
+
+        contentValues.put("title", task.title)
+        contentValues.put("description", task.description)
+
+        try{
+
+            db.beginTransaction()
+
+            db.update(TABLENAME, contentValues,"id=?", arrayOf("${task.id}"))
+
+            loadTasks()
+
+        }catch(e: Exception){
+            Log.v("@ERROR", e.toString())
+        }finally {
+
+            db.endTransaction()
+
+        }
+
+    }
+
 }
