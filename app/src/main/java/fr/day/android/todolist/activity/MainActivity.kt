@@ -5,41 +5,53 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
-import fr.day.android.todolist.adapters.TaskAdapter
 import kotlinx.android.synthetic.main.activity_list.*
 import kotlinx.android.synthetic.main.content_list.*
-import android.widget.AdapterView.AdapterContextMenuInfo
-import android.view.ContextMenu
-import android.view.View
-import android.widget.ListView
+import fr.day.android.todolist.adapter.TasksAdapter
+
+import kotlinx.android.synthetic.main.activity_list.view.*
+import kotlinx.android.synthetic.main.content_list.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var taskList: SQLiteManager
+    private lateinit var tasksAdapter: TasksAdapter
+    private lateinit var tasks: MutableList<Task>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
         setSupportActionBar(toolbar)
         
-        registerForContextMenu(taskListView)
+        //registerForContextMenu(taskListView)
 
-       // val data = SQLiteManager.getInstance(this)?.loadTasks()
-      //  if (data != null) taskListView.adapter = TaskAdapter(this, data)
-
-        val test = listOf( Task(1, "Faire un thiép", "Humm Delicicous"),
+        val test = listOf(Task(1, "Faire un thiép", "Humm Delicicous"),
                 Task(2, "Faire un mafé", "Humm ultra délicious"))
 
         SQLiteManager.getInstance(this)?.let {
+
             test.forEach { task ->
                 it.add(task)
             }
-            it.updateTask(Task(2, "Go run", "It is better than eating"))
+
+            //it.updateTask(Task(2, "Go run", "It is better than eating"))
+
+           // it.deleteTask(Task(1, "Faire un thiép", "Humm Delicicous"))
+
+            it.loadTasks()
+
             it.tasks.forEach {
-                Log.v("@@@ERROR", "${it.id} \t ${it.title} \t ${it.description}")
+                Log.v("@@@TEST", "${it.id} \t ${it.title} \t ${it.description}")
             }
+
+            //tasks = it.tasks
+
+            tasksAdapter = TasksAdapter(this, it.tasks)
+            taskListView.adapter = tasksAdapter
+
         }
+
 
 
         fab.setOnClickListener {
@@ -50,18 +62,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         return false
-    }
-
-    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo) {
-        /*
-        if (v.getId() == R.id.taskListView) {
-            val lv = v as ListView
-            val acmi = menuInfo as AdapterContextMenuInfo
-            val obj = lv.getItemAtPosition(acmi.position) as Task
-
-            menu.add("Delete " + obj.title)
-        }
-        */
     }
 
 }

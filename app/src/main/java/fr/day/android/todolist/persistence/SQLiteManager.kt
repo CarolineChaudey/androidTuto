@@ -111,19 +111,34 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
         contentValues.put("description", task.description)
 
         try{
-
             db.beginTransaction()
-
             db.update(TABLENAME, contentValues,"id=?", arrayOf("${task.id}"))
-
             loadTasks()
-
         }catch(e: Exception){
             Log.v("@ERROR", e.toString())
         }finally {
-
             db.endTransaction()
+            db.close()
+        }
 
+    }
+
+    fun deleteTask(task: Task){
+
+        val db = writableDatabase
+
+        try {
+            db.beginTransaction()
+
+            db.delete(TABLENAME, "id=?", arrayOf("${task.id}"))
+
+            loadTasks()
+
+        }catch (e: Exception){
+            Log.v("@ERROR while deleting", e.toString())
+        }finally {
+            db.endTransaction()
+            db.close()
         }
 
     }
