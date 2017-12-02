@@ -7,7 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 
 /**
- * Created by caroline on 27/11/17.
+ * Created by Fode on 27/11/17.
+ * Updated by Caroline
  */
 class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DATABASENAME,
         null, DATABASEVERSION) {
@@ -71,10 +72,11 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
 
     }
 
-    fun getAll(): List<Task>? {
+    fun getAll(): MutableList<Task> {
         val db = this.writableDatabase
         db.beginTransaction()
-        val result = arrayListOf<Task>()
+        //val result = arrayListOf<Task>()
+        val result = mutableListOf<Task>()
         try {
             var cursor = db.rawQuery("select * from ${TABLENAME}", null)
             if (cursor.moveToFirst()) {
@@ -95,26 +97,8 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
     }
 
     private fun loadTasks(){
-        val db = readableDatabase
-
         tasks.clear()
-
-        try {
-
-            db.beginTransaction()
-            val cursor = db.rawQuery("SELECT * FROM $TABLENAME", null)
-
-            if (cursor.moveToFirst()) {
-                do {
-                    tasks.add(Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2)))
-                } while (cursor.moveToNext())
-            }
-        } catch (e: Exception) {
-            Log.v("@@@ERROR", e.toString())
-        } finally {
-            db.endTransaction()
-        }
-
+        tasks = getAll()
     }
 
     fun updateTask(task: Task){
