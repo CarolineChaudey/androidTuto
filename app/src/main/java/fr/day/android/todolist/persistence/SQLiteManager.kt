@@ -71,6 +71,29 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
 
     }
 
+    fun getAll(): List<Task>? {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        val result = arrayListOf<Task>()
+        try {
+            var cursor = db.rawQuery("select * from ${TABLENAME}", null)
+            if (cursor.moveToFirst()) {
+                do {
+                    result.add( Task(
+                                    cursor.getInt(0),
+                                    cursor.getString(1),
+                                    cursor.getString(2)
+                    ))
+                } while (cursor.moveToNext())
+            }
+        } catch (e: Exception) {
+            Log.v("@@@ERROR", e.toString())
+        } finally {
+            db.endTransaction()
+        }
+        return result
+    }
+
     private fun loadTasks(){
         val db = readableDatabase
 
