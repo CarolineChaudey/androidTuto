@@ -7,6 +7,11 @@ import android.view.Menu
 import fr.day.android.todolist.adapters.TaskAdapter
 import kotlinx.android.synthetic.main.activity_list.*
 import kotlinx.android.synthetic.main.content_list.*
+import android.widget.AdapterView.AdapterContextMenuInfo
+import android.view.ContextMenu
+import android.view.View
+import android.widget.ListView
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,16 +21,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
         setSupportActionBar(toolbar)
+        
+        registerForContextMenu(taskListView)
 
-        //val dataList = listOf(Task(1, "Faire le ménage", "Super crados"), Task(2, "Coder le tuto", "Ultra urgent"),
-                //Task(3, "Faire du sport", "Je suis fatigué"), Task(4, "Réviser l'électro", "Je n'ai toujours rien compris à ce cours"))
-        /*
-        SQLiteManager.getInstance(this)?.let {
-            dataList.forEach { task ->
-                        it.add(task)
-            }
-        }
-    */
         val data = SQLiteManager.getInstance(this)?.getAll()
         if (data != null) taskListView.adapter = TaskAdapter(this, data)
 
@@ -51,5 +49,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         return false
+    }
+
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo) {
+        if (v.getId() == R.id.taskListView) {
+            val lv = v as ListView
+            val acmi = menuInfo as AdapterContextMenuInfo
+            val obj = lv.getItemAtPosition(acmi.position) as Task
+
+            menu.add("Delete " + obj.title)
+        }
     }
 }
