@@ -13,6 +13,8 @@ import android.util.Log
 class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DATABASENAME,
         null, DATABASEVERSION) {
 
+    var tasks = mutableListOf<Task>()
+
     override fun onCreate(db: SQLiteDatabase?) {
         db?.let {
             val query = "CREATE TABLE $TABLENAME(id INTEGER PRIMARY KEY, title TEXT, description TEXT);"
@@ -33,7 +35,6 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
 
     }
 
-    var tasks = mutableListOf<Task>()
 
     companion object {
 
@@ -72,16 +73,20 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
 
     }
 
-    fun getAll(): MutableList<Task> {
+    fun loadTasks() {
+
+        tasks.clear()
+
         val db = this.writableDatabase
-        db.beginTransaction()
-        //val result = arrayListOf<Task>()
-        val result = mutableListOf<Task>()
+
         try {
+
+            db.beginTransaction()
+
             var cursor = db.rawQuery("select * from ${TABLENAME}", null)
             if (cursor.moveToFirst()) {
                 do {
-                    result.add( Task(
+                    tasks.add( Task(
                                     cursor.getInt(0),
                                     cursor.getString(1),
                                     cursor.getString(2)
@@ -93,13 +98,8 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
         } finally {
             db.endTransaction()
         }
-        return result
     }
 
-    private fun loadTasks(){
-        tasks.clear()
-        tasks = getAll()
-    }
 
     fun updateTask(task: Task){
 

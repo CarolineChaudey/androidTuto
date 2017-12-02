@@ -3,6 +3,7 @@ package fr.day.android.todolist
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import fr.day.android.todolist.adapters.TaskAdapter
 import kotlinx.android.synthetic.main.activity_list.*
@@ -24,26 +25,26 @@ class MainActivity : AppCompatActivity() {
         
         registerForContextMenu(taskListView)
 
-        val data = SQLiteManager.getInstance(this)?.getAll()
-        if (data != null) taskListView.adapter = TaskAdapter(this, data)
+       // val data = SQLiteManager.getInstance(this)?.loadTasks()
+      //  if (data != null) taskListView.adapter = TaskAdapter(this, data)
+
+        val test = listOf( Task(1, "Faire un thiép", "Humm Delicicous"),
+                Task(2, "Faire un mafé", "Humm ultra délicious"))
+
+        SQLiteManager.getInstance(this)?.let {
+            test.forEach { task ->
+                it.add(task)
+            }
+            it.updateTask(Task(2, "Go run", "It is better than eating"))
+            it.tasks.forEach {
+                Log.v("@@@ERROR", "${it.id} \t ${it.title} \t ${it.description}")
+            }
+        }
+
 
         fab.setOnClickListener {
-
             val toAddTask = Intent(this, AddTaskActivity::class.java)
             startActivity(toAddTask)
-            /*
-            SQLiteManager.getInstance(this)?.let {
-
-                SQLiteManager.getInstance(this)?.let {
-                    it.updateTask(Task(1, "Faire le tour du monde", "Very important"))
-                }
-
-                it.tasks.forEach {
-                    Log.v("@@@ tasks list", "${it.id} \t ${it.title} \t ${it.description}")
-                }
-
-            }
-            */
         }
     }
 
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo) {
+        /*
         if (v.getId() == R.id.taskListView) {
             val lv = v as ListView
             val acmi = menuInfo as AdapterContextMenuInfo
@@ -59,5 +61,7 @@ class MainActivity : AppCompatActivity() {
 
             menu.add("Delete " + obj.title)
         }
+        */
     }
+
 }
