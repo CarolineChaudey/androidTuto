@@ -21,13 +21,15 @@ import kotlinx.android.synthetic.main.content_list.taskListView
 class MainActivity : AppCompatActivity() {
 
     private lateinit var tasksAdapter: TasksAdapter
-    lateinit var prefs : PrefsManager
+    lateinit var prefs: PrefsManager
 
 
     val CREATE_TASK_REQUEST_CODE = 1
-    val EDIT_TASK_REQUEST_CODE = 1
+    val EDIT_TASK_REQUEST_CODE = 2
 
+    lateinit var taskToEdit: Task
 
+    var tasks: MutableList<Task>? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,15 +45,13 @@ class MainActivity : AppCompatActivity() {
                 Task("Faire un mafé", "Humm ultra délicious")))
 
 
-        prefs.saveTask(tasksList)
-        prefs.getAllTasks()
+        prefs.getAllTasks()?.let {
 
-        prefs.tasksList.items.forEach {
-            Log.v("@@@@@TEST", it.title)
+            tasks = it.items
+            tasksAdapter = TasksAdapter(this, tasks!!)
+            taskListView.adapter = tasksAdapter
+
         }
-
-        tasksAdapter = TasksAdapter(this, prefs.tasksList.items)
-        taskListView.adapter = tasksAdapter
 
 
         fab.setOnClickListener {
@@ -62,20 +62,38 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        if(requestCode == CREATE_TASK_REQUEST_CODE){
-            if(resultCode == Activity.RESULT_OK) {
-                val rawNewtask = data?.extras?.getString("new_task")
-                val newTask = Gson().fromJson(rawNewtask, Task::class.java)
+        when (requestCode) {
 
-                prefs.tasksList.items.add(newTask)
-                prefs.saveTask(prefs.tasksList)
+            EDIT_TASK_REQUEST_CODE -> {
 
-                tasksAdapter.notifyDataSetChanged()
+                if (resultCode == Activity.RESULT_OK) {
 
+                    val rawEditedTask = data?.extras?.getString("edit_task")
+                    val editedTask = Gson().fromJson(rawEditedTask, Task::class.java)
+
+                    tasks!!.add(editedTask)
+                    prefs.saveTask(Tasks(tasks!!))
+
+                    recreate()
+                }
+            }
+
+            CREATE_TASK_REQUEST_CODE -> {
+
+                if (resultCode == Activity.RESULT_OK) {
+
+                    val rawNewTask = data?.extras?.getString("new_task")
+                    val newTask = Gson().fromJson(rawNewTask, Task::class.java)
+                    tasks!!.add(newTask)
+                    prefs.saveTask(Tasks(tasks!!))
+
+                    recreate()
+
+                }
             }
         }
-    }
 
+    }
 
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
@@ -98,14 +116,24 @@ class MainActivity : AppCompatActivity() {
             menuInfo?.let { meunuInfo ->
 
                 when (menuItem.title) {
-                    "MODIFIER" -> {
 
+                    "MODIFIER" -> {
+                        val taskToUpdate = tasks!![menuInfo.position]
+                        val toEditTask = Intent(this, AddTaskActivity::class.java)
+                        toEditTask.putExtra("edit_task", Gson().toJson(taskToUpdate))
+
+                        tasks!!.remove(taskToUpdate)
+
+
+                        startActivityForResult(toEditTask, EDIT_TASK_REQUEST_CODE)
                     }
 
                     "SUPPRIMER" -> {
-                        prefs.tasksList.items.removeAt(menuInfo.position)
-                        prefs.saveTask(prefs.tasksList)
+                        tasks!!.removeAt(menuInfo.position)
+                        prefs.saveTask(Tasks(tasks!!))
                         tasksAdapter.notifyDataSetChanged()
+                    }
+                    else -> {
                     }
                 }
             }
