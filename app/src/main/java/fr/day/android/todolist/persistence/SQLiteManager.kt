@@ -13,28 +13,6 @@ import android.util.Log
 class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DATABASENAME,
         null, DATABASEVERSION) {
 
-    var tasks = mutableListOf<Task>()
-
-    override fun onCreate(db: SQLiteDatabase?) {
-        db?.let {
-            val query = "CREATE TABLE $TABLENAME(id INTEGER PRIMARY KEY, title TEXT, description TEXT);"
-            it.execSQL(query)
-            Log.v("@@@TESSSTTT", "task database created successfully")
-        }
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-
-        if (oldVersion != newVersion) {
-            val dropTableQuery = "DROP TABLE IF EXISTS $TABLENAME;"
-            db?.let {
-                it.execSQL(dropTableQuery)
-                onCreate(it)
-            }
-        }
-
-    }
-
 
     companion object {
 
@@ -52,6 +30,30 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
             return INSTANCE
         }
     }
+    override fun onCreate(db: SQLiteDatabase?) {
+        db?.let {
+            val query = "CREATE TABLE $TABLENAME(id INTEGER PRIMARY KEY, title TEXT, description TEXT);"
+            it.execSQL(query)
+            Log.v("@@@TESSSTTT", "task database created successfully")
+        }
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+
+        if (oldVersion != newVersion) {
+            val dropTableQuery = "DROP TABLE IF EXISTS $TABLENAME;"
+            db?.let {
+                it.execSQL(dropTableQuery)
+                onCreate(it)
+            }
+        }
+    }
+
+    /*
+    var tasks = mutableListOf<Task>()
+
+
+
 
     fun add(task: Task) {
 
@@ -74,32 +76,28 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
     }
 
     fun loadTasks() {
-
         tasks.clear()
-
-        val db = this.writableDatabase
-
+        val db = writableDatabase
         try {
-
             db.beginTransaction()
-
-            var cursor = db.rawQuery("select * from ${TABLENAME}", null)
+            var cursor = db.rawQuery("select * from $TABLENAME", null)
             if (cursor.moveToFirst()) {
                 do {
-                    tasks.add( Task(
-                                    cursor.getInt(0),
+                    tasks.add(Task(
                                     cursor.getString(1),
                                     cursor.getString(2)
                     ))
                 } while (cursor.moveToNext())
             }
+
+            db.setTransactionSuccessful()
+
         } catch (e: Exception) {
             Log.v("@@@ERROR", e.toString())
         } finally {
             db.endTransaction()
         }
     }
-
 
     fun updateTask(task: Task){
 
@@ -111,14 +109,17 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
         contentValues.put("description", task.description)
 
         try{
+
             db.beginTransaction()
             db.update(TABLENAME, contentValues,"id=?", arrayOf("${task.id}"))
+
+            db.setTransactionSuccessful()
             loadTasks()
+
         }catch(e: Exception){
             Log.v("@ERROR", e.toString())
         }finally {
             db.endTransaction()
-            db.close()
         }
 
     }
@@ -127,10 +128,13 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
 
         val db = writableDatabase
 
-        try {
-            db.beginTransaction()
+        db.beginTransaction()
 
-            db.delete(TABLENAME, "id=?", arrayOf("${task.id}"))
+        try {
+
+            //db.delete(TABLENAME, "id=?", arrayOf("${task.id}"))
+
+            db.execSQL("DELETE FROM $TABLENAME WHERE id=${task.id}")
 
             loadTasks()
 
@@ -142,5 +146,7 @@ class SQLiteManager(private val context: Context) : SQLiteOpenHelper(context, DA
         }
 
     }
+
+    */
 
 }

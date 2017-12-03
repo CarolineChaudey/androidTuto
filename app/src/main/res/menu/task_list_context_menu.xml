@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="fr.day.android.todolist.MainActivity">
+
+    <item
+        android:id="@+id/edit_task"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="100"
+        android:title="MODIFIER"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/delete_task"
+        android:icon="@android:drawable/ic_delete"
+        android:orderInCategory="100"
+        android:title="SUPRIMER"
+        app:showAsAction="always" />
+</menu>

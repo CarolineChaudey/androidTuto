@@ -1,67 +1,117 @@
 package fr.day.android.todolist
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.Menu
-import kotlinx.android.synthetic.main.activity_list.*
-import kotlinx.android.synthetic.main.content_list.*
+import android.view.ContextMenu
+import android.view.MenuItem
+import android.view.View
+import android.widget.AdapterView
+import com.google.gson.Gson
 import fr.day.android.todolist.adapter.TasksAdapter
-
-import kotlinx.android.synthetic.main.activity_list.view.*
-import kotlinx.android.synthetic.main.content_list.*
+import fr.day.android.todolist.model.Tasks
+import fr.day.android.todolist.persistence.PrefsManager
+import kotlinx.android.synthetic.main.activity_list.fab
+import kotlinx.android.synthetic.main.activity_list.toolbar
+import kotlinx.android.synthetic.main.content_list.taskListView
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var tasksAdapter: TasksAdapter
-    private lateinit var tasks: MutableList<Task>
+    lateinit var prefs : PrefsManager
+
+
+    val CREATE_TASK_REQUEST_CODE = 1
+    val EDIT_TASK_REQUEST_CODE = 1
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
         setSupportActionBar(toolbar)
-        
-        //registerForContextMenu(taskListView)
 
-        val test = listOf(Task(1, "Faire un thiép", "Humm Delicicous"),
-                Task(2, "Faire un mafé", "Humm ultra délicious"))
+        prefs = PrefsManager(this)
 
-        SQLiteManager.getInstance(this)?.let {
+        registerForContextMenu(taskListView)
 
-            test.forEach { task ->
-                it.add(task)
-            }
+        var tasksList = Tasks(mutableListOf(Task("Faire un thiép", "Humm Delicicous"),
+                Task("Faire un mafé", "Humm ultra délicious")))
 
-            //it.updateTask(Task(2, "Go run", "It is better than eating"))
 
-           // it.deleteTask(Task(1, "Faire un thiép", "Humm Delicicous"))
+        prefs.saveTask(tasksList)
+        prefs.getAllTasks()
 
-            it.loadTasks()
-
-            it.tasks.forEach {
-                Log.v("@@@TEST", "${it.id} \t ${it.title} \t ${it.description}")
-            }
-
-            //tasks = it.tasks
-
-            tasksAdapter = TasksAdapter(this, it.tasks)
-            taskListView.adapter = tasksAdapter
-
+        prefs.tasksList.items.forEach {
+            Log.v("@@@@@TEST", it.title)
         }
 
+        tasksAdapter = TasksAdapter(this, prefs.tasksList.items)
+        taskListView.adapter = tasksAdapter
 
 
         fab.setOnClickListener {
             val toAddTask = Intent(this, AddTaskActivity::class.java)
-            startActivity(toAddTask)
+            startActivityForResult(toAddTask, CREATE_TASK_REQUEST_CODE)
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        return false
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        if(requestCode == CREATE_TASK_REQUEST_CODE){
+            if(resultCode == Activity.RESULT_OK) {
+                val rawNewtask = data?.extras?.getString("new_task")
+                val newTask = Gson().fromJson(rawNewtask, Task::class.java)
+
+                prefs.tasksList.items.add(newTask)
+                prefs.saveTask(prefs.tasksList)
+
+                tasksAdapter.notifyDataSetChanged()
+
+            }
+        }
+    }
+
+
+
+    override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+
+        menu?.let {
+            it.add(0, 1, 0, "MODIFIER").setIcon(R.drawable.ic_edit)
+            it.add(0, 2, 1, "SUPPRIMER")
+        }
+
+    }
+
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+
+        item?.let { menuItem ->
+
+            val menuInfo = (menuItem.menuInfo as AdapterView.AdapterContextMenuInfo?)
+
+            menuInfo?.let { meunuInfo ->
+
+                when (menuItem.title) {
+                    "MODIFIER" -> {
+
+                    }
+
+                    "SUPPRIMER" -> {
+                        prefs.tasksList.items.removeAt(menuInfo.position)
+                        prefs.saveTask(prefs.tasksList)
+                        tasksAdapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        }
+
+        return super.onContextItemSelected(item)
     }
 
 }
