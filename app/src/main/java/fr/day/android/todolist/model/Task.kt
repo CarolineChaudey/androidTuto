@@ -19,7 +19,7 @@ data class Task(var id: Int?, var title: String, var description: String = "") {
 
     fun delete(db: DatabaseHelper) {
         db.use {
-            //delete(db.TABLE_NAME, "${db.ID_COLUMN} = {taskId}", "taskId" to id!!)
+            delete(db.TABLE_NAME, "${db.ID_COLUMN} = ${id}", null)
         }
     }
 

@@ -1,7 +1,8 @@
-package fr.day.android.todolist
+package fr.day.android.todolist.activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import fr.day.android.todolist.R
 import fr.day.android.todolist.model.Task
 import fr.day.android.todolist.persistence.DatabaseHelper
 import kotlinx.android.synthetic.main.activity_add_task.*

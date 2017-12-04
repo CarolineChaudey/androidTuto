@@ -2,7 +2,6 @@ package fr.day.android.todolist.persistence
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import fr.day.android.todolist.model.Task
 import org.jetbrains.anko.db.*
 
 /**
