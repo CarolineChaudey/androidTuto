@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import fr.day.android.todolist.R
-import fr.day.android.todolist.Task
+import fr.day.android.todolist.model.Task
 
 /**
  * Created by caroline on 02/12/17.
@@ -17,9 +17,9 @@ class TaskAdapter(var context: Context, var mList: List<Task>): BaseAdapter() {
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
         val view: View?
         val mInflator = LayoutInflater.from(context)
-        when(p1) {
-            null -> view = mInflator.inflate(R.layout.task_list_row, p2, false)
-            else -> view = p1
+        view = when(p1) {
+            null -> mInflator.inflate(R.layout.task_list_row, p2, false)
+            else -> p1
         }
         // filling the view
         val task = mList.get(p0)

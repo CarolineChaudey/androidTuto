@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import fr.day.android.todolist.model.Task
 
 /**
  * Created by Fode on 27/11/17.
